@@ -276,6 +276,63 @@
     display: flex; align-items: flex-start;
     justify-content: space-between; gap: 12px;
   }
+  .pcard-main {
+    display: flex; align-items: flex-start; gap: 12px;
+    min-width: 0; flex: 1 1 auto;
+  }
+  .pcard-photo {
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex: 0 0 auto;
+    background: var(--peri-mist);
+    border: 1px solid var(--line);
+    cursor: zoom-in;
+    transition: transform .15s;
+  }
+  .pcard-photo:active { transform: scale(.96); }
+
+  /* ---------- LIGHTBOX ---------- */
+  .lightbox {
+    position: fixed; inset: 0;
+    background: rgba(20, 25, 45, .88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 200;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .lightbox.open { display: flex; opacity: 1; }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    object-fit: contain;
+    cursor: zoom-out;
+    transform: scale(.96);
+    transition: transform .2s;
+  }
+  .lightbox.open img { transform: scale(1); }
+  .lightbox-close {
+    position: absolute;
+    top: max(14px, env(safe-area-inset-top));
+    right: 14px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,.25); }
+  .pcard-text { min-width: 0; flex: 1 1 auto; }
   .pcard .variety { font-size: 16.5px; line-height: 1.25; }
   .pcard .art { margin-top: 2px; }
   .ready-num {
@@ -349,6 +406,30 @@
   .error-box.show { display: block; }
   .error-box strong { display: block; margin-bottom: 4px; }
 
+  /* ---------- HINT ---------- */
+  .hint {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--peri-soft);
+    border: 1px solid #D6DEF5;
+    color: var(--peri-dark);
+    border-radius: 12px;
+    padding: 9px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .hint svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--peri-deep); }
+  .hint-text { flex: 1 1 auto; }
+  .hint-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--peri-dark); opacity: .6;
+    padding: 4px; margin: -4px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hint-close:hover { opacity: 1; }
+  .hint.hidden { display: none; }
+
   .skeleton { animation: pulse 1.3s ease-in-out infinite; background: var(--gray-soft); border-radius: 8px; color: transparent !important; }
   @keyframes pulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
 
@@ -373,6 +454,11 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
 </div>
 
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Перегляд фото">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Закрити">✕</button>
+  <img id="lightboxImg" alt="">
+</div>
+
 <header class="hero">
   <div class="hero-top">
     <img class="logo" src="data:image/png;base64,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" alt="Peonita">
@@ -393,6 +479,13 @@
 
   <section class="section">
     <div class="chips" id="chips"></div>
+    <div class="hint" id="photoHint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+      <span class="hint-text">Натисніть на фото сорту, щоб переглянути його у повному розмірі</span>
+      <button class="hint-close" id="hintClose" aria-label="Сховати підказку">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
     <div class="status-grid" id="statusGrid">
       <div class="state" style="grid-column:1/-1"><span class="flower">❀</span>Завантаження даних…</div>
     </div>
@@ -421,9 +514,24 @@ const RANGES = {
 const STATUS_META = {
   'Зрізають':     { cls: 'b-cut',   color: 'var(--green)', order: 0 },
   'Буде пізніше': { cls: 'b-later', color: 'var(--amber)', order: 1 },
-  'Більше нема':  { cls: 'b-done',  color: 'var(--gray)',  order: 2, dim: true },
+  'Більше нема на полі':  { cls: 'b-done',  color: 'var(--gray)',  order: 2, dim: true },
   'Без статусу':  { cls: 'b-none',  color: 'var(--peri)',  order: 3 }
 };
+
+const PHOTOS = {
+  'sarah bernhardt':     'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/s/a/sara_-_1.webp',
+  'shirley temple':      'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/s/h/shirley_temple_1_2.webp',
+  'gardenia':            'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/2/_/2_3_2.webp',
+  'class act':           'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/c/l/class_act_-_1.webp',
+  'monsieur jules elie': 'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/m/o/monsieur_jules_elie_1_2.webp',
+  'henry sass':          'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/h/e/henry_-_1.webp',
+  'alertie':             'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/a/l/alertie_-_1.webp',
+  'henry bockstoce':     'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/h/e/henry_bockstoce_1_2.webp',
+  'coral charm':         'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/c/o/coral_charm_1_1.webp',
+  'florence nicholls':   'https://florium.ua/media/catalog/product/cache/2/file/9df78eab33525d08d6e5fb8d27136e95/f/l/florence_-_1.webp'
+};
+const normName = s => String(s ?? '').toLowerCase().replace(/[ʼ'`’]/g, '').replace(/\s+/g, ' ').trim();
+const photoFor = name => PHOTOS[normName(name)] || null;
 
 let statusData = [];
 let activeFilter = 'all';
@@ -600,7 +708,7 @@ document.addEventListener('touchend', () => {
 });
 
 function renderChips(list) {
-  const order = ['all', 'available', 'cleaning', 'Зрізають', 'Буде пізніше', 'Більше нема'];
+  const order = ['all', 'available', 'cleaning', 'Зрізають', 'Буде пізніше', 'Більше нема на полі'];
   const labels = { all: 'Усі', available: 'Є в наявності', cleaning: 'Чистять' };
   const counts = {
     all: list.length,
@@ -635,11 +743,18 @@ function renderStatusGrid() {
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.2 2.2M16.2 16.2l2.2 2.2M5.6 18.4l2.2-2.2M16.2 7.8l2.2-2.2"/></svg>
            Чистять · ${fmt(v.buffer)} шт</span>`
       : '';
+    const photo = photoFor(v.name);
+    const photoEl = photo
+      ? `<img class="pcard-photo" src="${esc(photo)}" alt="${esc(v.name)}" loading="lazy">`
+      : '';
     return `<div class="pcard${dim}" style="--accent:${m.color}">
       <div class="pcard-row">
-        <div>
-          <div class="variety">${esc(v.name)}</div>
-          <div class="art">арт. ${esc(v.art)}</div>
+        <div class="pcard-main">
+          ${photoEl}
+          <div class="pcard-text">
+            <div class="variety">${esc(v.name)}</div>
+            <div class="art">арт. ${esc(v.art)}</div>
+          </div>
         </div>
         <div class="ready-num${numCls}">
           <b>${fmt(v.ready)}</b>
@@ -653,6 +768,46 @@ function renderStatusGrid() {
     </div>`;
   }).join('');
 }
+
+/* ---------- Photo hint ---------- */
+const photoHint = $('photoHint');
+if (localStorage.getItem('peonita.photoHintHidden') === '1') {
+  photoHint.classList.add('hidden');
+}
+$('hintClose').addEventListener('click', () => {
+  photoHint.classList.add('hidden');
+  localStorage.setItem('peonita.photoHintHidden', '1');
+});
+
+/* ---------- Lightbox ---------- */
+const lightbox = $('lightbox');
+const lightboxImg = $('lightboxImg');
+
+function openLightbox(src, alt) {
+  lightboxImg.src = src;
+  lightboxImg.alt = alt || '';
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => { lightboxImg.src = ''; }, 200);
+}
+
+document.addEventListener('click', e => {
+  const photo = e.target.closest('.pcard-photo');
+  if (photo) {
+    e.stopPropagation();
+    openLightbox(photo.src, photo.alt);
+  }
+});
+lightbox.addEventListener('click', e => {
+  if (e.target === lightbox || e.target.id === 'lightboxClose' || e.target === lightboxImg) closeLightbox();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+});
 
 loadData();
 setInterval(loadData, 120000); // автооновлення кожні 2 хв
